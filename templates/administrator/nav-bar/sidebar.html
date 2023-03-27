@@ -1,0 +1,78 @@
+
+  <div class="sidebar-sticky">
+    <ul class="nav flex-column" id="myDIV">
+      <li class="nav-item">
+        <a class="nav-link active" class="btn" href="{{url_for('admin_dashboard')}}">
+          <span data-feather="home"></span>
+          Dashboard <span class="sr-only"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" class="btn" href="{{url_for('lookup')}}">
+          <span data-feather="monitor"></span>
+          Setting
+        </a>
+      </li>
+      <div style="border-top: 3px solid #bbb; margin-top: 30px"></div>
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>User </span>
+        <a class="d-flex align-items-center text-muted" href="#"></a>
+      </h6>
+
+      <li class="nav-item">
+        <a class="nav-link" class="btn" href="{{url_for('pic_management')}}">
+          <span data-feather="slack"></span>
+          Administrator Management
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" class="btn" href="{{url_for('complaint_management')}}">
+          <span data-feather="users"></span>
+          User Management
+        </a>
+      </li>
+      <div style="border-top: 3px solid #bbb; margin-top: 30px"></div>
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Ticket</span>
+        <a class="d-flex align-items-center text-muted" href="#"></a>
+      </h6>
+
+      <li class="nav-item">
+        <a class="nav-link" class="btn" href="{{url_for('ticket_logs')}}">
+          <span data-feather="layers"></span>
+          Open
+        </a>
+      </li>
+      <!--<li class="nav-item">
+        <a class="nav-link" class="btn" href="{{url_for('pic_logs')}}">
+          <span data-feather="activity"></span>
+          In Progress
+        </a>
+      </li>-->
+      <div style="border-top: 3px solid #bbb; margin-top: 30px"></div>
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span> </span>
+        <a class="d-flex align-items-center text-muted" href="#"></a>
+      </h6>
+      <li class="nav-item">
+        <a class="nav-link" class="btn" href="#">
+          <span data-feather="bar-chart-2"></span>
+          Reports
+        </a>
+      </li>
+    </ul>
+
+    <script>
+      // Add active class to the current button (highlight it)
+      var header = document.getElementById("myDIV");
+      var btns = header.getElementsByClassName("btn");
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function() {
+        var current = document.getElementsByClassName("active");
+        current[0].className = current[0].className.replace(" active", "");
+        this.className += " active";
+        });
+      }
+      </script>
+
+

@@ -1,0 +1,253 @@
+{% extends 'administrator/base.html' %}
+
+{% block content %}
+<h1 class="h2">Administrator Management</h1>
+<div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+        <button class="btn btn-sm btn-outline-secondary">Share</button>
+        <button class="btn btn-sm btn-outline-secondary">Export</button>
+    </div>
+</div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="input-group rounded">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <span class="input-group-text border-0" id="search-addon">
+                    <i data-feather="search"></i>
+                </span>
+            </div>
+        </div>
+        <div class="col-sm-8"></div>
+        <div class="col-sm-1">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <span data-feather="user-plus"></span>
+            </button>
+            <!-- Modal Add New Admin Department -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Add New Department Admin</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST">
+                            <div class="modal-body">
+                                {{ form_pic.hidden_tag() }}
+                                <div class="form-group">
+                                    {{ form_pic.name.label(class="form-label") }}
+                                    {{ form_pic.name(class="form-control") }}
+                                </div><br>
+                                <div class="form-group">
+                                    {{ form_pic.username.label(class="form-label") }}
+                                    {{ form_pic.username(class="form-control") }}
+                                </div><br>
+                                <div class="form-group">
+                                    {{ form_pic.email.label(class="form-label") }}
+                                    {{ form_pic.email(class="form-control") }}
+                                </div><br>
+                                <div class="form-group">
+                                    {{ form_pic.password_hash.label(class="form-label") }}
+                                    {{ form_pic.password_hash(class="form-control") }}
+                                </div><br>
+                                <div class="form-group">
+                                    {{ form_pic.password_hash2.label(class="form-label") }}
+                                    {{ form_pic.password_hash2(class="form-control") }}
+                                </div><br>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    {{ form_pic.department.label(class="form-label") }}
+                                    <select class="form-select" id="department" name="department">
+                                        {% for department in form_pic.department.choices %}
+                                        <option value="{{ department[0] }}">{{ department[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div><br>
+                                <input type="hidden" name="status" value="6">
+                            </div>
+                            <div class="modal-footer">
+                                {{ form_pic.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-2">
+
+        </div>
+        <!-- Content Here-->
+        <div class="col-sm-8">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        <h3 style="margin-top: 1%;">Head Department</h3>
+        <table class="table" style="margin-top: 2%;">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" style="text-align: center;"> Add members</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Department</th>
+                    <th scope="col" style="text-align: center;">Total Members</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in our_pic %}
+                <tr>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addMember{{row.1}}">
+                            <span data-feather="user-plus"></span>
+                        </button>
+                    </td>
+                    <td>{{row[2]}}</td>
+                    <td>{{row[3]}}</td>
+                    <td>{{row[4]}}</td>
+                    <td style="text-align: center;">{{row[5]}}</td>
+                    <td>
+                        <a href="#"><span data-feather="edit-2" class="text-warning" data-bs-toggle="modal"
+                                data-bs-target="#editModal{{row.id}}"></a></span>
+                        <a href="{{ url_for('delete_pic', id=row.id) }}"
+                            onclick="return confirm('Are You Sure You want to Delete?')"><span data-feather="trash-2"
+                                class="text-danger"></a></span>
+                    </td>
+                </tr>
+                {% endfor %}
+                <!-- Modal Edit -->
+                {% for row in our_pic %}
+                <div class="modal fade" id="editModal{{row.id}}" tabindex="-1" aria-labelledby="editModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel">Update Person In Charge</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <form action="{{ url_for('update_pic', id=row.id) }}" method="POST">
+                                <div class="modal-body">
+                                    <input type="hidden" name="id" value="{{row.id}}">
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input value="{{row[2]}}" type="text" class="form-control" name="name">
+                                    </div><br>
+                                    <div class="form-group">
+                                        {{ form_pic.email.label(class="form-label") }}
+                                        {{ form.email(class="form-control", value=row.email) }}
+                                    </div><br>
+                                    <div class="form-group">
+                                        {{ form_pic.department.label(class="form-label") }}
+                                        <select class="form-select" id="department" name="department">
+                                            {% for department in form_pic.department.choices %}
+                                            {% if department[0] == row.department_id %}
+                                            <option value="{{ department[0] }}" selected>{{ department[1] }}</option>
+                                            {% else %}
+                                            <option value="{{ department[0] }}">{{ department[1] }}</option>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </div><br>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <!-- Modal Add -->
+                {% for row in our_pic %}
+                <div class="modal fade" id="addMember{{row.1}}" tabindex="-1" aria-labelledby="addMemberLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="addMemberLabel">Add New {{row.4}} Member</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <form method="POST">
+                                <div class="modal-body">
+                                    {{ form_member.hidden_tag() }}
+                                    <div style="display: none;">
+                                        {{ form_member.supervise(value=row.1) }}
+                                        {{ form_member.department(value=row.4) }}
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        {{ form_member.name.label(class="form-label") }}
+                                        {{ form_member.name(class="form-control") }}
+                                    </div><br>
+                                    <div class="form-group">
+                                        {{ form_member.username.label(class="form-label") }}
+                                        {{ form_member.username(class="form-control") }}
+                                    </div><br>
+                                    <div class="form-group">
+                                        {{ form_member.email.label(class="form-label") }}
+                                        {{ form_member.email(class="form-control") }}
+                                    </div><br>
+                                    <div class="form-group">
+                                        {{ form_member.password_hash.label(class="form-label") }}
+                                        {{ form_member.password_hash(class="form-control") }}
+                                    </div><br>
+                                    <div class="form-group">
+                                        {{ form_member.password_hash2.label(class="form-label") }}
+                                        {{ form_member.password_hash2(class="form-control") }}
+                                    </div><br>
+                                    <input type="hidden" name="status" value="6">
+                                </div>
+                                <div class="modal-footer">
+                                    {{ form_member.submit(class="btn btn-primary") }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </tbody>
+        </table>
+        <br><br>
+        <h3 style="margin-top: 3%;">Department Member</h3>
+        <table class="table" style="margin-top: 2%;">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Department</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in pic_members %}
+                <tr>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }} Member</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+            <!-- Content end-->
+            <div class="col-sm-2"></div>
+    </div>
+</div>
+
+{% endblock %}

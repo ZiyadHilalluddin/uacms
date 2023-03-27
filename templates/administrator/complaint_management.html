@@ -1,0 +1,135 @@
+{% extends 'administrator/base.html' %}
+
+{% block content %}
+<h1 class="h2">User Management</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button class="btn btn-sm btn-outline-secondary">Share</button>
+            <button class="btn btn-sm btn-outline-secondary">Export</button>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="input-group rounded">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                <span class="input-group-text border-0" id="search-addon">
+                  <i data-feather="search"></i>
+                </span>
+            </div>
+        </div>
+        <div class="col-sm-8"></div>  
+        <div class="col-sm-1">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <span data-feather="user-plus"></span> 
+            </button>
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>   
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-2">
+
+        </div>
+        <!-- Content Here-->
+        <div class="col-sm-8">
+            {% for message in get_flashed_messages() %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+        <table class="table table-hover table-border table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            {% for our_user in our_users %}
+            <tbody>
+                <tr>
+                    <td>{{ our_user.id }}</td>
+                    <td>{{ our_user.username }}</td>
+                    <td>{{ our_user.name }}</td>
+                    <td>{{ our_user.email }}</td>
+                    <td>{{ our_user.role }}</td>
+                    <td>
+                        <a href="#"><span data-feather="edit-2" class="text-warning" data-bs-toggle="modal"
+                            data-bs-target="#editModal{{our_user.id}}"></a></span>
+                        <a href="{{ url_for('delete', id=our_user.id) }}"
+                            onclick="return confirm('Are You Sure You want to Delete?')"><span data-feather="trash-2"
+                                class="text-danger"></a></span>
+                    </td>
+                </tr>
+            </tbody>
+
+            <div class="modal fade" id="editModal{{our_user.id}}" tabindex="-1" aria-labelledby="editModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel">Update agent</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ url_for('update', id=our_user.id) }}" method="POST">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input value="{{our_user.name}}" type="text" class="form-control" name="name">
+                                </div><br>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input value="{{our_user.email}}" type="email" class="form-control" name="email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input value="{{our_user.password}}" type="text" class="form-control"
+                                        name="password">
+                                </div>
+                                <div class="form-group">
+                                    <label>role</label>
+                                    <input value="{{our_user.occupation}}" type="text" class="form-control"
+                                        name="occupation">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </table>
+        <!-- Content end-->
+        <div class="col-sm-2"></div>
+    </div>
+</div>
+
+{% endblock %}

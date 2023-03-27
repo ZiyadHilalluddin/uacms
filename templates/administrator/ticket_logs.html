@@ -1,0 +1,71 @@
+{% extends 'administrator/base.html' %}
+
+{% block content %}
+<h1 class="h2">Ticket Logs</h1>
+<div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+        <button class="btn btn-sm btn-outline-secondary">Share</button>
+        <button class="btn btn-sm btn-outline-secondary">Export</button>
+    </div>
+</div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="input-group rounded">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <span class="input-group-text border-0" id="search-addon">
+                    <i data-feather="search"></i>
+                </span>
+            </div>
+        </div>
+        <div class="col-sm-8"></div>
+        <div class="col-sm-1">
+
+        </div>
+    </div>
+    <br>
+</div>
+
+<table class="table">
+    <thead class="table-light">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Complainer</th>
+            <th scope="col">Message</th>
+            <th scope="col">Department</th>
+            <th scope="col">Assigned To</th>
+            <th scope="col">Status</th>
+            <th scope="col">Date Created</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ticket in assign_ticket %}
+        <tr>
+            <td>{{ ticket.ticket_id }}</td> 
+            <td>{{ ticket.Complainer }}</td>
+            <td>{{ ticket.message }}</td>
+            <td>{{ ticket.Department }}</td>
+            <td>{{ ticket["Assign to"] }}</td>
+            <td>{{ ticket.Status }}</td>
+            <td>{{ ticket.date_added }}</td>
+            <td><a href="#">View</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!--
+<script>
+    const myModal = document.getElementById('myModal')
+    const myInput = document.getElementById('myInput')
+
+    myModal.addEventListener('shown.bs.modal', () => {
+        myInput.focus()
+    })
+</script>
+-->
+
+{% endblock %}

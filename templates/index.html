@@ -1,0 +1,14 @@
+{% extends 'administrator/base.html' %}
+
+{% block content %}
+
+    <p>This is my first webpage</p>
+    <p>My name is {{ first_name}}</p>
+
+    <h3>Favourite Pizza :</h3>
+
+    {% for topping in favourite_pizza %}
+        {{ topping }}<br>
+    {% endfor %}
+
+{% endblock %}
