@@ -81,7 +81,8 @@
             <div class="col-sm-12 mb-3">
               <div class="card h-100">
                 <div class="card-body">
-                  <h6 class="d-flex align-items-center mb-3"><i class="material-icons text-info mr-2">Income</i>&nbsp Ticket</h6>
+                  <h6 class="d-flex align-items-center mb-3"><i class="material-icons text-info mr-2">Income</i>&nbsp
+                    Ticket</h6>
                   <table class="table">
                     <thead class="table-light">
                       <tr>
@@ -89,23 +90,32 @@
                         <th>Ticket Message</th>
                         <th>Date Open</th>
                         <th>Ticket Status</th>
+                        <th>Change Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {% for relation in relations %}
-                        {% if current_user.id == relation.delegate.user_id %}
-                          {% set ticket = relation.ticket %}
-                          <tr>
-                            <td>{{ ticket.ticket_id }}</td>
-                            <td>{{ ticket.message }}</td>
-                            <td>{{ ticket.date_added }}</td>
-                            <td>{{ ticket.status.name }}</td>
-                          </tr>
-                        {% endif %}
+                      {% for ticket in tickets %}
+                      <tr>
+                        <td>{{ ticket.ticket_id }}</td>
+                        <td>{{ ticket.message }}</td>
+                        <td>{{ ticket.date_added }}</td>
+                        <td>
+                          <form action="{{ url_for('update_status')}}" method="POST">
+                            <div style="display: none;">{{ form.ticket(value=ticket.ticket_id) }}</div>
+                            <select class="form-select" id="{{ form.status.id }}" name="{{ form.status.name }}" style="border-radius: 8px;width: 200px;">
+                              {% for choice in form.status.choices %}
+                              <option value="{{ choice[0] }}" {% if choice[0]==form.status.data %} selected {% endif %}>{{ ticket.status }}</option>
+                              {% endfor %}
+                            </select>
+                        <td>
+                          <button type="submit" class="btn btn-primary">Change</button>
+                        </td>
+                        </form>
+                        </td>
+                      </tr>
                       {% endfor %}
                     </tbody>
                   </table>
-                  
                 </div>
               </div>
             </div>

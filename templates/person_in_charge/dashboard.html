@@ -9,7 +9,7 @@
 </div>
 {% endfor %}
 
-<div class="vh-100" style="padding-top: 5%; position: fixed; top: 0; left: 0; width: 100%;">
+<div class="vh-100" style="padding-top: 5%; position: fixed; top: 0; left: 0; width: 100%; overflow-y: scroll;" >
   <div class="container">
     <div class="main-body">
       <div class="row gutters-sm">
@@ -90,7 +90,8 @@
                         <th>Reference Num</th>
                         <th>Ticket Message</th>
                         <th>Ticket Status</th>
-                        <th>Assign To</th>
+                        <th>Complainer</th>
+                        <th>Delegation</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -100,9 +101,14 @@
                         <td>{{ ticket.message }}</td>
                         <td>{% if status %}{{ status.name }}{% endif %}</td>
                         <td>{{ assignee }}</td>
+                        <td>
+                          <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#delegateModal{{ticket.ticket_id}}">
+                            Delegate
+                          </button>
+                        </td>
                       </tr>
                       {% endfor %}
-
                     </tbody>
                   </table>
                 </div>
@@ -115,8 +121,29 @@
   </div>
 </div>
 
-
-
+<!-- modal delegate task -->
+{% for ticket, assignee, type, status in data %}
+<div class="modal fade" id="delegateModal{{ticket.ticket_id}}" tabindex="-1"
+  aria-labelledby="delegateModalLabel{{ticket.ticket_id}}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="delegateModalLabel{{ticket.ticket_id}}">Delegate task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('update_delegate', ticket_id=ticket.ticket_id) }}" method="POST">
+        {{ form_delegate.csrf_token }}
+        <input type="hidden" name="ticket" value="{{ ticket.ticket_id }}">
+        <div class="form-group">
+          {{ form_delegate.name.label(class="form-label") }}
+          {{ form_delegate.name(class="form-control", placeholder="Select a  user to delegate to") }}
+        </div><br>
+        {{ form_delegate.submit(class="btn btn-primary") }}
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
 
 <!-- modal update user -->
 <div class="modal fade" id="editModal{{current_user.id}}" tabindex="-1" aria-labelledby="editModalLabel"

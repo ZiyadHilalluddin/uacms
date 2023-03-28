@@ -33,20 +33,20 @@
         <tr>
             <th scope="col">ID</th>
             <th scope="col">Complainer</th>
-            <th scope="col">Message</th>
+            <th scope="col">The Task</th>
             <th scope="col">Department</th>
-            <th scope="col">Assigned To</th>
+            <th scope="col">Head Department</th>
             <th scope="col">Status</th>
-            <th scope="col">Date Created</th>
+            <th scope="col">Date</th>
             <th scope="col">Action</th>
         </tr>
     </thead>
     <tbody>
         {% for ticket in assign_ticket %}
         <tr>
-            <td>{{ ticket.ticket_id }}</td> 
+            <td>{{ ticket.ticket_id }}</td>
             <td>{{ ticket.Complainer }}</td>
-            <td>{{ ticket.message }}</td>
+            <td>{{ ticket.task }}</td>
             <td>{{ ticket.Department }}</td>
             <td>{{ ticket["Assign to"] }}</td>
             <td>{{ ticket.Status }}</td>
@@ -54,6 +54,7 @@
             <td><a href="#">View</a></td>
         </tr>
         {% endfor %}
+
     </tbody>
 </table>
 

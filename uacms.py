@@ -1,6 +1,6 @@
 import random
 import mysql.connector
-from flask import Flask, redirect, render_template, flash, request, url_for, session, abort
+from flask import Flask, redirect, render_template, flash, request, url_for, session, abort,jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_wtf import FlaskForm
@@ -195,7 +195,29 @@ class Lookup_data(db.Model):
     def __str__(self):
         return self.name
     
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
 
+app.route('/api/user/add', methods=['POST'])
+def add_user_api():
+    data = request.get_json()
+    user = Users.query.filter_by(email=data['email']).first()
+    if user is not None:
+        return jsonify({'message': 'User already exists'}), 400
+    hashed_password = generate_password_hash(data['password'], 'sha256')
+    user = Users(name=data['name'], 
+                 username=data['username'], 
+                 email=data['email'], 
+                 password_hash=hashed_password,  
+                 role=data['role'])
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'message': 'User added successfully'}), 201
+
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
 
 ################################################################################ Flask Form  ################################################################################
 
@@ -265,6 +287,18 @@ class PICMemberForm(FlaskForm):
     supervise = StringField("Supervise", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+################################## Delegate Form ##################################
+class DelegateMember(FlaskForm):
+    name = SelectField("Delegate To", validators=[DataRequired()])
+    ticket= StringField("ticket", validators=[DataRequired()])
+    submit = SubmitField("Submit")  
+
+################################## Change Status Form ##################################
+class ChangeStatus(FlaskForm):
+    name = StringField("Delegate To", validators=[DataRequired()])
+    ticket = IntegerField("Ticket ID", validators=[DataRequired()])
+    status= SelectField("Status", validators=[DataRequired()])
+    submit = SubmitField("Submit") 
 
 ################################################################################ LOGIN - LOGOUT ################################################################################
 
@@ -328,12 +362,8 @@ def add_user():
         form.password_hash.data = ''
         form.role.data = ''
         flash("User Added Successfully")
-    our_users = Users.query.order_by(Users.date_added)
-    return render_template("add_user.html",
-                           form=form,
-                           name=name,
-                           our_users=our_users
-                           )
+        return redirect(url_for('user_login'))
+    return render_template("add_user.html",form=form,name=name,)
 
 
 ################################## UPDATE ##################################
@@ -676,14 +706,6 @@ def pic_management():
 
 
 
-    
-    #assign_ticket = Complaint_Ticket.query.join(Person_in_Charge).join(Users).join(Complaint_Ticket_Logs).join(Lookup_data).\
-    #    add_columns(Complaint_Ticket.id, Users.id, Complaint_Ticket.message ,Person_in_Charge.id.name ,Lookup_data.name, Complaint_Ticket_Logs.date_added).\
-    #    order_by(Complaint_Ticket.date_added).all()
-    
-
-
-
 
     return render_template('/administrator/pic_management.html',
                             our_pic=our_pic,
@@ -771,30 +793,27 @@ def ticket_logs():
     Lookup_data_2 = aliased(Lookup_data)
     Users_2 = aliased(Users)
     assign_ticket = db.session.query(
-    Complaint_Ticket.ticket_id,
-    Users.name.label("Complainer"),
-    Lookup_data_1.name.label("Department"),
-    Complaint_Ticket.message,
-    Users_2.name.label("Assign to"),
-    Lookup_data_2.name.label("Status"),
-    Complaint_Ticket_Logs.date_added
-).select_from(Complaint_Ticket).join(
-    Users, Complaint_Ticket.user_id == Users.id
-).join(
-    Complaint_Ticket_Logs, Complaint_Ticket.ticket_id == Complaint_Ticket_Logs.ticket_id
-).join(
-    Person_in_Charge, Complaint_Ticket_Logs.assign_by_id == Person_in_Charge.id
-).join(
-    Users_2, Person_in_Charge.user_id == Users_2.id
-).join(
-    Lookup_data_1, Person_in_Charge.department_id == Lookup_data_1.id
-).join(
-    Lookup_data_2, Complaint_Ticket.status_id == Lookup_data_2.id
-).order_by(Complaint_Ticket.date_added).all()
+        Complaint_Ticket.ticket_id,
+        Users.name.label("Complainer"),
+        Lookup_data_1.name.label("Department"),
+        Complaint_Ticket_Logs.task,  # Change this line to select task instead of message
+        Users_2.name.label("Assign to"),
+        Lookup_data_2.name.label("Status"),
+        Complaint_Ticket_Logs.date_added
+    ).select_from(Complaint_Ticket).join(
+        Users, Complaint_Ticket.user_id == Users.id
+    ).join(
+        Complaint_Ticket_Logs, Complaint_Ticket.ticket_id == Complaint_Ticket_Logs.ticket_id
+    ).join(
+        Person_in_Charge, Complaint_Ticket_Logs.assign_by_id == Person_in_Charge.id
+    ).join(
+        Users_2, Person_in_Charge.user_id == Users_2.id
+    ).join(
+        Lookup_data_1, Person_in_Charge.department_id == Lookup_data_1.id
+    ).join(
+        Lookup_data_2, Complaint_Ticket.status_id == Lookup_data_2.id
+    ).order_by(Complaint_Ticket.date_added).all()
 
-
-
- 
     return render_template('/administrator/ticket_logs.html',
                             ticket=ticket, 
                             assign_ticket=assign_ticket,
@@ -813,14 +832,8 @@ def pic_logs():
 @login_required
 def pic_dashboard():
     form = PICForm(obj=current_user)
+    form_delegate = DelegateMember()
 
-    if form.validate_on_submit():
-        current_user.name = form.name.data
-        current_user.email = form.email.data
-        db.session.commit()
-        flash("Profile Updated Successfully!")
-        return redirect(url_for('pic_dashboard'))
-    
     current_user_department_id = db.session.query(Lookup_data.id).\
     join(Person_in_Charge, Lookup_data.id == Person_in_Charge.department_id).\
     join(Users, Users.id == Person_in_Charge.user_id).\
@@ -847,10 +860,85 @@ def pic_dashboard():
         filter(Users.id == current_user.id).\
         scalar()
 
+    # query for all users with Person_in_Charge_member.department_id == current_user_department_id
+    users = Users.query.join(Person_in_Charge_member).filter(Person_in_Charge_member.department_id == current_user_department_id).all()
 
-    return render_template('/person_in_charge/dashboard.html', form=form, data=data, current_user_department_name=current_user_department_name)
+    # create a list of tuples with the user id and name
+    form_delegate.name.choices = [(user.id, user.name) for user in users]
+    
+    
+    return render_template('/person_in_charge/dashboard.html', form=form,
+                            data=data,
+                            form_delegate=form_delegate,
+                            current_user_department_name=current_user_department_name)
 
 
+@app.route('/update_delegate/<int:ticket_id>', methods=['GET', 'POST'])
+def update_delegate(ticket_id):
+    current_user_department_id = db.session.query(Lookup_data.id).\
+    join(Person_in_Charge, Lookup_data.id == Person_in_Charge.department_id).\
+    join(Users, Users.id == Person_in_Charge.user_id).\
+    filter(Users.id == current_user.id).\
+    scalar()
+
+    # query for all users with Person_in_Charge_member.department_id == current_user_department_id
+    users = Users.query.join(Person_in_Charge_member).filter(Person_in_Charge_member.department_id == current_user_department_id).all()
+
+    # create a list of tuples with the user id and name
+    form_delegate = DelegateMember()
+    form_delegate.name.choices = [(user.id, user.name) for user in users]
+
+    # find the complaint ticket to delegate
+    delegate_member = db.session.query(Person_in_Charge_member)\
+        .join(Person_in_Charge)\
+        .join(Users)\
+        .filter(Person_in_Charge_member.id == form_delegate.name.data)\
+        .first()
+
+    if form_delegate.validate_on_submit():
+        # retrieve the existing Complaint_Ticket_PIC_Relation object
+        ticket_assign = Complaint_Ticket_PIC_Relation.query.filter_by(ticket_id_fk=ticket_id).first()
+        delegate_member_id = int(form_delegate.name.data)
+
+        person_in_charge_member = Person_in_Charge_member.query.filter_by(user_id=delegate_member_id).first()
+        delegate_member_id = person_in_charge_member.id
+
+        # update the fields
+        ticket_assign.ticket_id_fk = form_delegate.ticket.data
+        ticket_assign.delegate_task = delegate_member_id 
+
+        # commit the changes
+        db.session.commit()
+
+        delegate_member_name = person_in_charge_member.user.name
+
+        assign_by_find_id = Person_in_Charge.query.filter_by(user_id=current_user.id).first()
+        assign_id = assign_by_find_id.id
+        ticket_logs = Complaint_Ticket_Logs(
+            ticket_id=form_delegate.ticket.data,
+            task=f"Delegate Task To {delegate_member_name}",
+            assign_by_id=assign_id,
+            date_added=datetime.utcnow()
+        )   
+        db.session.add(ticket_logs)
+        db.session.commit()
+        flash(f"Task delegated to {delegate_member_name} successfully.")
+
+    # create aliases for Lookup_data table
+    Lookup_data_type = aliased(Lookup_data)
+    Lookup_data_status = aliased(Lookup_data)
+ 
+    # query data with aliases
+    data = db.session.query(Complaint_Ticket, Users.name, Lookup_data_type, Lookup_data_status)\
+    .join(Users, Complaint_Ticket.user_id == Users.id)\
+    .join(Lookup_data_type, Complaint_Ticket.type_id == Lookup_data_type.id)\
+    .join(Lookup_data_status, Complaint_Ticket.status_id == Lookup_data_status.id)\
+    .join(Complaint_Ticket_PIC_Relation, Complaint_Ticket.ticket_id == Complaint_Ticket_PIC_Relation.ticket_id_fk)\
+    .join(Person_in_Charge, Complaint_Ticket_PIC_Relation.pic_id_fk == Person_in_Charge.id)\
+    .filter(Person_in_Charge.department_id == current_user_department_id)\
+    .all()
+          
+    return render_template('/person_in_charge/dashboard.html', data=data, form_delegate=form_delegate)
 
 
 
@@ -878,12 +966,47 @@ def update_dashboard_pic(id):
 @app.route('/pic/member/dashboard', methods=['GET', 'POST'])
 @login_required
 def pic_member_dashboard():
-    
-    relations = Complaint_Ticket_PIC_Relation.query.filter(
-    Complaint_Ticket_PIC_Relation.delegate.has(user=current_user)
-).all()
+    form = ChangeStatus()
+    status_option = Lookup_data.query.filter_by(group_flow=2, parent=0).all()
+    form.status.choices = [(status.id, status.name) for status in status_option]
 
-    return render_template('/person_in_charge/member/dashboard.html', relations=relations)
+    # get the person in charge member object associated with the current user
+    pic_member = Person_in_Charge_member.query.filter_by(user_id=current_user.id).first()
+    tickets = Complaint_Ticket.query \
+        .join(Complaint_Ticket_PIC_Relation, Complaint_Ticket.ticket_id == Complaint_Ticket_PIC_Relation.ticket_id_fk) \
+        .filter(Complaint_Ticket_PIC_Relation.delegate.has(id=pic_member.id)) \
+        .all()
+      
+    return render_template('/person_in_charge/member/dashboard.html',tickets=tickets, form=form)
+
+
+
+
+@app.route('/update_status> ', methods=['GET', 'POST'])
+def update_status():
+    form = ChangeStatus()
+    status_option = Lookup_data.query.filter_by(parent=0, group_flow=2).all()
+    form.status.choices = [(status.id, status.name) for status in status_option]
+
+    # get the person in charge member object associated with the current user
+    pic_member = Person_in_Charge_member.query.filter_by(user_id=current_user.id).first()
+    tickets = Complaint_Ticket.query \
+        .join(Complaint_Ticket_PIC_Relation, Complaint_Ticket.ticket_id == Complaint_Ticket_PIC_Relation.ticket_id_fk) \
+        .filter(Complaint_Ticket_PIC_Relation.delegate.has(id=pic_member.id)) \
+        .all()
+    
+    if request.method == "POST":
+        ticket_id = form.ticket.data    
+        new_status = form.status.data
+        ticket = Complaint_Ticket.query.filter_by(ticket_id=ticket_id).first()
+        ticket.status_id = new_status
+        db.session.commit()
+        flash('Ticket status has been updated!', 'success')
+        return redirect(url_for('pic_member_dashboard'))
+        
+
+
+    return render_template('/person_in_charge/member/dashboard.html',tickets=tickets, form=form)
 
 
 
@@ -901,18 +1024,4 @@ def page_not_found(e):
 
 with app.app_context():
     db.create_all()
-
-
-#data = Complaint_Ticket_PIC_Relation.query.join(Users).join(Lookup_data).join(Person_in_Charge_member).join(Complaint_Ticket).\
-#    add_columns().\
-#    order_by(Complaint_Ticket_PIC_Relation.date_added.desc()).all()
-
-#i want to display on table:
-#1st column "Reference Num" = Complaint_Ticket.ticket_id 
-#2nd Column "Ticket Message" = Complaint_Ticket.message
-#3rd Column "Date Open" = Complaint_Ticket.date_added
-#4th Column "Ticket Status" = Complaint_Ticket.status, i need to display the name that refer to Lookup_data
-
-
-
 

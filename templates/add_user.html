@@ -1,7 +1,7 @@
 {% extends '/user/base.html' %}
 
 {% block content %}
-<h1>Update User...</h1><br>
+
 {% for message in get_flashed_messages() %}
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
     {{ message }}
@@ -9,106 +9,40 @@
 </div>
 {% endfor %}
 
-
-
-<div class="container">
-    <div class="col-sm-6">
-        <form method="POST">
-            {{ form.hidden_tag() }}
-            {{ form.name.label(class="form-label") }}
-            {{ form.name(class="form-control") }}
-            <br>
-            {{ form.username.label(class="form-label") }}
-            {{ form.username(class="form-control") }}
-            <br>
-            {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control") }}
-            <br>
-            {{ form.password_hash.label(class="form-label") }}
-            {{ form.password_hash(class="form-control") }}
-            <br>
-            {{ form.password_hash2.label(class="form-label") }}
-            {{ form.password_hash2(class="form-control") }}
-            <br>
-            {{ form.role.label(class="form-label") }}
-            {{ form.role(class="form-control") }}
-            <br>
-            {{ form.submit(class="btn btn-primary") }}
-        </form>
-    </div>
-    <div class="col-sm-6"></div><br><br><br>
-    <div class="col-sm-6">
-        <table class="table table-hover table-border table-striped">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                    <th>role</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            {% for our_user in our_users %}
-            <tbody>
-                <tr>
-                    <td>{{ our_user.id }}</td>
-                    <td>{{ our_user.username }}</td>
-                    <td>{{ our_user.name }}</td>
-                    <td>{{ our_user.email }}</td>
-                    <td>{{ our_user.password_hash }}</td>
-                    <td>{{ our_user.role }}</td>
-                    <td>
-                        <a href="#"><span data-feather="edit-2" class="text-warning" data-bs-toggle="modal"
-                            data-bs-target="#editModal{{our_user.id}}"></a></span>
-                        <a href="{{ url_for('delete', id=our_user.id) }}"
-                            onclick="return confirm('Are You Sure You want to Delete?')"><span data-feather="trash-2"
-                                class="text-danger"></a></span>
-                    </td>
-                </tr>
-            </tbody>
-
-            <div class="modal fade" id="editModal{{our_user.id}}" tabindex="-1" aria-labelledby="editModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editModalLabel">Update agent</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form action="{{ url_for('update', id=our_user.id) }}" method="POST">
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label>Name</label>
-                                    <input value="{{our_user.name}}" type="text" class="form-control" name="name">
-                                </div><br>
-                                <div class="form-group">
-                                    <label>Email</label>
-                                    <input value="{{our_user.email}}" type="email" class="form-control" name="email">
-                                </div>
-                                <div class="form-group">
-                                    <label>Password</label>
-                                    <input value="{{our_user.password}}" type="text" class="form-control"
-                                        name="password">
-                                </div>
-                                <div class="form-group">
-                                    <label>role</label>
-                                    <input value="{{our_user.occupation}}" type="text" class="form-control"
-                                        name="occupation">
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </div>
-                        </form>
-                    </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-4">Register new Account</h2>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control") }}
                 </div>
-            </div>
-            {% endfor %}
-        </table>
+                <div class="mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.password_hash.label(class="form-label") }}
+                    {{ form.password_hash(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.password_hash2.label(class="form-label") }}
+                    {{ form.password_hash2(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.role.label(class="form-label") }}
+                    {{ form.role(class="form-control") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </form>
+        </div>
     </div>
-    <div class="col-sm-6"></div>
 </div>
 
 {% endblock %}

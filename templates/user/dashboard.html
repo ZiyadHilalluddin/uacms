@@ -135,11 +135,11 @@
           <div class="form-group">
             <label>Category</label>
             {{ form.type.label(class="form-label") }}
-            <select class="form-select" id="type" name="type">
-              {% for department in form.type.choices %}
-              <option value="{{ department[0] }}">{{ department[1] }}</option>
-              {% endfor %}
-            </select>
+              <select class="form-select" id="type" name="type">
+                {% for department in form.type.choices %}
+                <option value="{{ department[0] }}">{{ department[1] }}</option>
+                {% endfor %}
+              </select>
           </div><br>
           <div class="form-group">
             {{ form.message.label(class="form-label") }}
